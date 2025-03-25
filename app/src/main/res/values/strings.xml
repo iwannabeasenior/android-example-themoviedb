@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">movie</string>
+    <string name="app_title">Movie App</string>
+    <string name="not_connected">⚠️ You aren’t connected to the internet</string>
+    <string name="splash_movie_1">The good, the bad and the ugly</string>
+    <string name="splash_movie_2">Forrest Gump</string>
+    <string name="splash_movie_3">The dark knight</string>
+</resources>
