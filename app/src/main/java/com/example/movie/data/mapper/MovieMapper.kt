@@ -1,18 +1,23 @@
 package com.example.movie.data.mapper
 
+import com.example.movie.data.response.CastMemberResponse
 import com.example.movie.data.response.GenreResponse
+import com.example.movie.data.response.MovieCreditsResponse
 import com.example.movie.data.response.NetWorkResponse
 import com.example.movie.data.response.MovieDetailResponse
 import com.example.movie.data.response.MovieResponse
 import com.example.movie.data.response.ProductionCompanyResponse
 import com.example.movie.data.response.ProductionCountryISOResponse
 import com.example.movie.data.response.SpokenLanguageResponse
+import com.example.movie.data.response.VideoResponse
+import com.example.movie.domain.model.CastMember
 import com.example.movie.domain.model.Genre
 import com.example.movie.domain.model.Movie
 import com.example.movie.domain.model.MovieDetail
 import com.example.movie.domain.model.ProductionCompany
 import com.example.movie.domain.model.ProductionCountryISO
 import com.example.movie.domain.model.SpokenLanguage
+import com.example.movie.domain.model.Video
 import javax.inject.Inject
 
 class MovieMapper @Inject constructor(
@@ -98,6 +103,44 @@ class MovieMapper @Inject constructor(
             logoPath = item.logoPath,
             name = item.name,
             originCountry = item.originCountry
+        )
+    }
+
+    fun mapVideo(item: VideoResponse): Video {
+        return Video(
+            ios = item.ios,
+            name = item.name,
+            key = item.key,
+            site = item.site,
+            size = item.size,
+            type = item.type,
+            official = item.official,
+            publishedAt = item.publishedAt,
+            id = item.id
+        )
+    }
+    fun mapListVideo(videos: NetWorkResponse<List<VideoResponse>>): List<Video> {
+        return videos.results.map { mapVideo(it) }
+    }
+
+    // for credit
+    fun mapListCast(credit: MovieCreditsResponse): List<CastMember> {
+        return credit.cast.map { mapCast(it) }
+    }
+    fun mapCast(cast: CastMemberResponse) : CastMember {
+        return CastMember(
+            adult = cast.adult,
+            gender = cast.gender,
+            id = cast.id,
+            knownForDepartment = cast.knownForDepartment,
+            name = cast.name,
+            originalName = cast.originalName,
+            popularity = cast.popularity,
+            profilePath = cast.profilePath,
+            castId = cast.castId,
+            character = cast.character,
+            creditId = cast.creditId,
+            order = cast.order
         )
     }
 }

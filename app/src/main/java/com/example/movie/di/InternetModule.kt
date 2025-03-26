@@ -75,11 +75,11 @@ object InternetModule {
             .addInterceptor(interceptor)
             .build()
     }
-//    @Singleton
-//    @Provides
-//    fun provideMovieRepo(repo: MovieRepository): MovieRepo = repo
-//    @Singleton
-//    @Provides
-//    fun bindsNetworkMonitor(netWorkMonitor: ConnectivityManagerNetWorkMonitor): NetWorkMonitor = netWorkMonitor
+    @Singleton
+    @Provides
+    internal  fun bindsNetworkMonitor(netWorkMonitor: ConnectivityManagerNetWorkMonitor): NetWorkMonitor = netWorkMonitor
 
+    @Singleton
+    @Provides
+    internal  fun provideMovieRepo(repo: MovieRepository): MovieRepo = repo
 }

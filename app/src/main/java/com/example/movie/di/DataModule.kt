@@ -12,14 +12,14 @@ import dagger.hilt.android.scopes.ActivityScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class DataModule {
-    @Singleton
-    @Binds
-    internal abstract fun bindsNetworkMonitor(netWorkMonitor: ConnectivityManagerNetWorkMonitor): NetWorkMonitor
-
-    @Singleton
-    @Binds
-    internal abstract fun provideMovieRepo(repo: MovieRepository): MovieRepo
-}
+//@Module
+//@InstallIn(SingletonComponent::class)
+//abstract class DataModule {
+//    @Singleton
+//    @Binds
+//    internal abstract fun bindsNetworkMonitor(netWorkMonitor: ConnectivityManagerNetWorkMonitor): NetWorkMonitor
+//
+//    @Singleton
+//    @Binds
+//    internal abstract fun provideMovieRepo(repo: MovieRepository): MovieRepo
+//}

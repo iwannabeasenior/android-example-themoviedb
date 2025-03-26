@@ -268,6 +268,7 @@ private fun TrendingItem(
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
             overflow = TextOverflow.Ellipsis,
+            maxLines = 1
         )
         Spacer(modifier = Modifier.height(5.dp))
         Text(

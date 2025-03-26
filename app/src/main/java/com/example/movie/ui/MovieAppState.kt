@@ -50,11 +50,15 @@ class MovieAppState (
     val netWorkMonitor: NetWorkMonitor,
     val coroutineScope: CoroutineScope
 ) {
+    // difference with normal state flow is that it can stop collect data from flow when no one subscribe, state flow is stop state.
     val isOffline = netWorkMonitor.isOnline
         .map(Boolean::not)
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.WhileSubscribed(5_000),
+            /* delay 5s before stopping flow when last subscriber disappears
+               - 2 other type: SharingStarted.Eagerly && SharingStarted.Lazily
+             */
             initialValue = false
         )
 
@@ -77,6 +81,14 @@ class MovieAppState (
                 currentDestination?.hasRoute(route = topLevelDestination.route) == true
             }
         }
+
+    val isNotTopLevelDestination: Boolean
+        @Composable
+        get() = TopLevelDestination.entries.all { topLevelDestination ->
+                currentDestination?.route != topLevelDestination.route.qualifiedName
+            }
+
+
     val topLevelDestinations: List<TopLevelDestination> = TopLevelDestination.entries
 
     fun navigateToTopLevelDestination(topLevelDestination: TopLevelDestination) {
@@ -97,4 +109,8 @@ class MovieAppState (
             }
         }
     }
+    fun onBackPressed() {
+        navController.popBackStack()
+    }
+
 }

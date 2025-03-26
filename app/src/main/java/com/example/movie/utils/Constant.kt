@@ -5,4 +5,5 @@ object Constant {
     val API_KEY = "3d1291b6c7ef1f4672c7ed8b004ee196"
     val BASE_URL = "https://api.themoviedb.org/3/"
     val IMAGE_URL = "https://image.tmdb.org/t/p/w500/"
+    val YOUTUBE_THUMBNAIL_URL = "https://img.youtube.com/vi/{key}/hqdefault.jpg"
 }

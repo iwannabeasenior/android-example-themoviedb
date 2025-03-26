@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
+    kotlin("kapt")
     id ("kotlin-parcelize")
     id("com.google.dagger.hilt.android")
     id ("org.jetbrains.kotlin.plugin.serialization")
@@ -44,9 +44,6 @@ android {
 
     kapt {
         correctErrorTypes = true
-        arguments {
-            arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
-        }
     }
 }
 
@@ -73,16 +70,19 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+    implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")  // ✅ For Jetpack Compose
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.11.0") // JSON Parser
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0") // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7") // Compose ViewModel
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation(platform("androidx.compose:compose-bom:2025.02.00"))
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.jakewharton.timber:timber:5.0.1")
+
+    implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+
 }

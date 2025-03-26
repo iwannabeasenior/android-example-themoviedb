@@ -14,7 +14,9 @@ import android.net.NetworkRequest.Builder
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 
 class ConnectivityManagerNetWorkMonitor @Inject constructor(
@@ -22,7 +24,9 @@ class ConnectivityManagerNetWorkMonitor @Inject constructor(
 //    @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
     ) : NetWorkMonitor {
     override val isOnline: Flow<Boolean> = callbackFlow {
+
         val connectivityManager = context.getSystemService<ConnectivityManager>()
+
         if (connectivityManager == null) {
             channel.trySend(false)
             channel.close()
@@ -46,12 +50,20 @@ class ConnectivityManagerNetWorkMonitor @Inject constructor(
                 trySend(networks.isNotEmpty())
             }
         }
+
         val request = Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
+
         connectivityManager.registerNetworkCallback(request, callback)
+
         channel.trySend(connectivityManager.isCurrentlyConnected())
+
+        awaitClose {
+            connectivityManager.unregisterNetworkCallback(callback)
+        }
     }
+        .distinctUntilChanged()
         .conflate()
 
     @Suppress("DEPRECATION")
