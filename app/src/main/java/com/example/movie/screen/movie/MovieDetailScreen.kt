@@ -1,6 +1,5 @@
 package com.example.movie.screen.movie
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,22 +25,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -55,14 +49,13 @@ import com.example.movie.domain.model.Video
 import com.example.movie.ui.theme.GreenMovie
 import com.example.movie.ui.theme.PurpleMovie
 import com.example.movie.utils.Constant
-import com.example.movie.utils.YoutubeUtil
+import com.example.movie.utils.LinkUtil
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-import org.jetbrains.annotations.Async
 
 @Composable
-fun MovieDetailScreen(movieDetailVM: MovieDetailVM = hiltViewModel()) {
+fun MovieDetailScreen(movieDetailVM: MovieDetailVM = hiltViewModel(), navigateToPersonDetail: (Int) -> Unit) {
 
     val movieUiState by movieDetailVM.uiState
 
@@ -75,7 +68,7 @@ fun MovieDetailScreen(movieDetailVM: MovieDetailVM = hiltViewModel()) {
         }
     ) {
         when (movieUiState) {
-             is MovieDetailUIState.Failure ->
+             is MovieDetailUIState.Error ->
                 FailureComponent(
                     Modifier.align(Alignment.Center)
                 ) {
@@ -83,7 +76,7 @@ fun MovieDetailScreen(movieDetailVM: MovieDetailVM = hiltViewModel()) {
                 }
             is MovieDetailUIState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             is MovieDetailUIState.Success -> {
-                SuccessMovieDetail((movieUiState as MovieDetailUIState.Success).data)
+                SuccessMovieDetail((movieUiState as MovieDetailUIState.Success).data, navigateToPersonDetail)
             }
         }
         if (movieDetailVM.showVideo.value && movieDetailVM.currentVideoKey.value != null) {
@@ -106,7 +99,7 @@ fun FailureComponent(modifier: Modifier = Modifier, onClick: () -> Unit) {
     }
 }
 @Composable
-private fun SuccessMovieDetail(movie: MovieDetail) {
+private fun SuccessMovieDetail(movie: MovieDetail, navigateToPersonDetail: (Int) -> Unit) {
     
     val vm: MovieDetailVM = hiltViewModel()
     
@@ -246,13 +239,11 @@ private fun SuccessMovieDetail(movie: MovieDetail) {
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             items((castUIState as CastUIState.Success).data) {
-                                ActorItem(cast = it) {
-                                    // navigate to actor detail page
-                                }
+                                ActorItem(cast = it, navigateToPersonDetail)
                             }
                         }
                     }
-                    is CastUIState.Failure -> FailureComponent { vm.loadCasts() }
+                    is CastUIState.Error -> FailureComponent { vm.loadCasts() }
                     is CastUIState.Loading -> CircularProgressIndicator()
                 }
             }
@@ -267,7 +258,7 @@ private fun SuccessMovieDetail(movie: MovieDetail) {
 
             ) {
                 when (videoUIState) {
-                    is VideoUIState.Failure -> FailureComponent {
+                    is VideoUIState.Error -> FailureComponent {
                         vm.loadVideos()
                     }
                     is VideoUIState.Loading -> CircularProgressIndicator()
@@ -299,7 +290,7 @@ private fun ItemVideo(video: Video, onClick: () -> Unit) {
     ) {
         video.key?.let {
             AsyncImage(
-                model = YoutubeUtil.createYoutubeThumbnailURL(it),
+                model = LinkUtil.createYoutubeThumbnailURL(it),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -335,13 +326,13 @@ fun YouTubePlayerScreen(modifier: Modifier = Modifier, videoKey: String) {
 @Composable
 private fun ActorItem(
     cast: CastMember,
-    onClick: () -> Unit
+    onClick: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier
             .size(height = 200.dp, width = 100.dp)
             .clickable {
-                onClick()
+                onClick(cast.id)
             }
             .clip(RoundedCornerShape(10.dp))
             .background(Color.White)
@@ -357,8 +348,7 @@ private fun ActorItem(
                 .weight(2f)
                 .clip(RoundedCornerShape(topEnd = 10.dp, topStart = 10.dp))
         )
-        Text(
-            cast.originalName,
+        Text(cast.originalName ?: "",
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
             textAlign = TextAlign.Center,
@@ -366,7 +356,7 @@ private fun ActorItem(
             modifier = Modifier.fillMaxWidth()
         )
         Text(
-            cast.character,
+            cast.character ?: "",
             fontSize = 16.sp,
             modifier = Modifier.fillMaxWidth(),
             maxLines = 1,

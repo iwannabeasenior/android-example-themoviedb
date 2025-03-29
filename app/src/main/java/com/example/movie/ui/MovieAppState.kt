@@ -1,12 +1,10 @@
 package com.example.movie.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.util.trace
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -14,6 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.example.movie.datastore.UserPreferences
 import com.example.movie.navigation.TopLevelDestination
 import com.example.movie.navigation.navigateToActor
 import com.example.movie.navigation.navigateToHome
@@ -22,7 +21,7 @@ import com.example.movie.navigation.navigateToMovie
 import com.example.movie.utils.NetWorkMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
@@ -32,15 +31,17 @@ import timber.log.Timber
 fun rememberMovieAppState(
     navController: NavHostController = rememberNavController(),
     netWorkMonitor: NetWorkMonitor,
-    coroutineScope: CoroutineScope = rememberCoroutineScope()
-): MovieAppState{
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
+    userPreferences: UserPreferences
+): MovieAppState {
     return remember (
         navController
     ) {
         MovieAppState(
             navController = navController,
             netWorkMonitor = netWorkMonitor,
-            coroutineScope = coroutineScope
+            coroutineScope = coroutineScope,
+            userPreferences = userPreferences
         )
     }
 }
@@ -48,7 +49,8 @@ fun rememberMovieAppState(
 class MovieAppState (
     val navController: NavHostController,
     val netWorkMonitor: NetWorkMonitor,
-    val coroutineScope: CoroutineScope
+    val coroutineScope: CoroutineScope,
+    val userPreferences: UserPreferences
 ) {
     // difference with normal state flow is that it can stop collect data from flow when no one subscribe, state flow is stop state.
     val isOffline = netWorkMonitor.isOnline
@@ -61,6 +63,24 @@ class MovieAppState (
              */
             initialValue = false
         )
+
+    val isFirstTime = userPreferences
+        .isNotFirstTime()
+        .map { FirstTimeState.Loaded(it != true) }
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Eagerly,
+            initialValue = FirstTimeState.Loading
+        )
+
+    val isLogin = userPreferences.getSessionId()
+        .map { LoginState.Loaded(!it.isNullOrEmpty()) }
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Eagerly,
+            initialValue = LoginState.Loading
+        )
+
 
 
     private val previousDestination = mutableStateOf<NavDestination?>(null)
@@ -95,8 +115,10 @@ class MovieAppState (
         trace("Navigation: ${topLevelDestination.name}") {
             Timber.d("Navigation: ${topLevelDestination.name}")
             val topLevelNavOptions = navOptions {
-                popUpTo(navController.graph.findStartDestination().id) {
+                // pop before navigate
+                popUpTo(navController.graph.findStartDestination().id) { // always back to home and exit
                     saveState = true
+//                    inclusive = true // pop matching ID , not pop any route between
                 }
                 launchSingleTop = true
                 restoreState = true // restore state for any  for saveState in popUpToBuilder
@@ -112,5 +134,13 @@ class MovieAppState (
     fun onBackPressed() {
         navController.popBackStack()
     }
+}
 
+sealed class FirstTimeState {
+    object Loading: FirstTimeState()
+    data class Loaded(val value: Boolean?): FirstTimeState()
+}
+sealed class LoginState {
+    object Loading: LoginState()
+    data class Loaded(val value: Boolean): LoginState()
 }

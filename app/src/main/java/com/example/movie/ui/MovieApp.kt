@@ -39,6 +39,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.navOptions
 import com.example.movie.R
+import com.example.movie.navigation.MainNavHost
 import com.example.movie.navigation.MovieNavHost
 import com.example.movie.navigation.TopLevelDestination
 import com.example.movie.ui.theme.GreenMovie
@@ -47,22 +48,8 @@ import kotlin.reflect.KClass
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieApp(modifier: Modifier = Modifier, appState: MovieAppState) {
+fun MovieApp(appState: MovieAppState, onNavigateToLogin: () -> Unit) {
     val currentDestination = appState.currentDestination
-    val isOffline = appState.isOffline.collectAsStateWithLifecycle()
-    val snackBarHostState = remember {
-        SnackbarHostState()
-    }
-    val notConnectedMessage = stringResource(R.string.not_connected)
-    LaunchedEffect(isOffline) {
-        Log.d("is_offline", isOffline.value.toString())
-        if (isOffline.value) {
-            snackBarHostState.showSnackbar(
-                message = notConnectedMessage,
-                duration = SnackbarDuration.Indefinite
-            )
-        }
-    }
     Scaffold(
         bottomBar = {
             BottomAppBar(
@@ -100,7 +87,9 @@ fun MovieApp(modifier: Modifier = Modifier, appState: MovieAppState) {
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            MovieNavHost(navController = appState.navController)
+            MainNavHost(navController = appState.navController, appState = appState) {
+                onNavigateToLogin()
+            }
         }
     }
 }

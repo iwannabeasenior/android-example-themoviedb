@@ -1,5 +1,6 @@
 package com.example.movie.di
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import okhttp3.ResponseBody
@@ -18,11 +19,9 @@ class ValueExtractorConverterFactory(private val gson: Gson) : Converter.Factory
     ): Converter<ResponseBody, *> {
         return Converter { responseBody ->
             val responseString = responseBody.string()
-
             try {
                 val jsonObject = JSONObject(responseString)
-                val valueObject = jsonObject.optJSONObject("result")
-
+                val valueObject = jsonObject.optJSONArray("results")
                 if (valueObject != null) {
                     gson.fromJson(valueObject.toString(), type)
                 } else {
@@ -31,6 +30,11 @@ class ValueExtractorConverterFactory(private val gson: Gson) : Converter.Factory
             } catch (e: JSONException) {
                 throw JsonParseException("Error parsing response")
             }
+        }
+    }
+    companion object {
+        fun create(gson: Gson): ValueExtractorConverterFactory {
+            return ValueExtractorConverterFactory(gson)
         }
     }
 }

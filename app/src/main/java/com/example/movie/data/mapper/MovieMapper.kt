@@ -6,6 +6,7 @@ import com.example.movie.data.response.MovieCreditsResponse
 import com.example.movie.data.response.NetWorkResponse
 import com.example.movie.data.response.MovieDetailResponse
 import com.example.movie.data.response.MovieResponse
+import com.example.movie.data.response.PersonDetailResponse
 import com.example.movie.data.response.ProductionCompanyResponse
 import com.example.movie.data.response.ProductionCountryISOResponse
 import com.example.movie.data.response.SpokenLanguageResponse
@@ -14,15 +15,15 @@ import com.example.movie.domain.model.CastMember
 import com.example.movie.domain.model.Genre
 import com.example.movie.domain.model.Movie
 import com.example.movie.domain.model.MovieDetail
+import com.example.movie.domain.model.PersonDetail
 import com.example.movie.domain.model.ProductionCompany
 import com.example.movie.domain.model.ProductionCountryISO
 import com.example.movie.domain.model.SpokenLanguage
 import com.example.movie.domain.model.Video
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class MovieMapper @Inject constructor(
-
-) {
+class MovieMapper @Inject constructor() {
 
     fun mapListMovie(movies: NetWorkResponse<List<MovieResponse>>): List<Movie> {
         return movies.results.map {
@@ -141,6 +142,21 @@ class MovieMapper @Inject constructor(
             character = cast.character,
             creditId = cast.creditId,
             order = cast.order
+        )
+    }
+    fun mapPersonDetail(person: PersonDetailResponse): PersonDetail {
+        return PersonDetail(
+            gender = person.gender,
+            id = person.id,
+            name = person.name,
+            birthday = person.birthday,
+            placeOfBirth = person.placeOfBirth,
+            biography = person.biography,
+            knownFor = person.knownFor,
+            popularity = person.popularity,
+            alsoKnownAs = person.alsoKnownAs,
+            profilePath = person.profilePath,
+            imdbId = person.imdbId
         )
     }
 }

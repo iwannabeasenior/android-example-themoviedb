@@ -55,7 +55,7 @@ import com.example.movie.ui.theme.PurpleMovie
 
 @Preview
 @Composable
-fun SplashScreen(modifier: Modifier = Modifier) {
+fun SplashScreen(onNavigateToLogin: () -> Unit) {
     val splashImage = listOf<Int>(
         R.drawable.gbu,
         R.drawable.forrest_gump,
@@ -77,11 +77,6 @@ fun SplashScreen(modifier: Modifier = Modifier) {
 
     var maxIndex = splashImage.size - 1
 
-    ConstraintLayout {
-        val (a,b,c) = createRefs()
-
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -91,9 +86,7 @@ fun SplashScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         TextButton(
-            onClick = {
-
-            },
+            onClick = onNavigateToLogin,
             modifier = Modifier.align(Alignment.End)
         ) {
             Text("Skip", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black)
@@ -135,7 +128,7 @@ fun SplashScreen(modifier: Modifier = Modifier) {
             IconButton(
                 onClick = {
                     if (currentIndex == maxIndex) {
-                        // navigate
+                        onNavigateToLogin()
                     } else {
                         currentIndex++
                     }

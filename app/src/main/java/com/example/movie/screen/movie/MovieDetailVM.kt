@@ -62,7 +62,7 @@ class MovieDetailVM @Inject constructor(
             uiState.value = when (result) {
                 is Result.Success -> MovieDetailUIState.Success(result.data)
                 is Result.Loading -> MovieDetailUIState.Loading
-                is Result.Error -> MovieDetailUIState.Failure
+                is Result.Error -> MovieDetailUIState.Error
             }
         }
     }
@@ -73,7 +73,7 @@ class MovieDetailVM @Inject constructor(
             val result = getVideosMovieUC.execute(movieId)
             videoUiState.value = when(result) {
                 is Result.Success -> VideoUIState.Success(result.data)
-                is Result.Error -> VideoUIState.Failure
+                is Result.Error -> VideoUIState.Error
                 is Result.Loading -> VideoUIState.Loading
             }
         }
@@ -85,7 +85,7 @@ class MovieDetailVM @Inject constructor(
             val result = getCastsMovieUC.execute(movieId)
             castUiState.value = when(result) {
                 is Result.Success -> CastUIState.Success(result.data)
-                is Result.Error -> CastUIState.Failure
+                is Result.Error -> CastUIState.Error
                 is Result.Loading -> CastUIState.Loading
             }
         }
@@ -94,17 +94,17 @@ class MovieDetailVM @Inject constructor(
 
 sealed interface MovieDetailUIState {
     data class Success(val data: MovieDetail): MovieDetailUIState
-    data object Failure: MovieDetailUIState
+    data object Error: MovieDetailUIState
     data object Loading: MovieDetailUIState
 }
 
 sealed interface VideoUIState {
     data class Success(val data: List<Video>): VideoUIState
-    data object Failure: VideoUIState
+    data object Error: VideoUIState
     data object Loading: VideoUIState
 }
 sealed interface CastUIState {
     data class Success(val data: List<CastMember>): CastUIState
-    data object Failure: CastUIState
+    data object Error: CastUIState
     data object Loading: CastUIState
 }

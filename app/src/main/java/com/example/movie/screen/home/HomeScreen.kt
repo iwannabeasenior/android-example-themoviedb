@@ -25,11 +25,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.movie.R
 import com.example.movie.ui.theme.BlueMovie
@@ -52,195 +55,241 @@ import com.example.movie.ui.theme.PinkMovie
 import com.example.movie.ui.theme.PurpleMovie
 import com.example.movie.ui.theme.YellowMovie
 import com.example.movie.utils.Constant
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 
+@OptIn(FlowPreview::class)
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel(), navigateToMovieDetail: (Int) -> Unit) {
     // handle text search when configuration change
-    var textSearch by remember {
+    var query by remember {
         mutableStateOf("")
     }
 
     val trendingMovieState by homeViewModel.trendingUiState
+
+    val queryResult by homeViewModel.queryResult.collectAsStateWithLifecycle()
 
     var trendingMode by remember {
         mutableStateOf(TrendingMode.day)
     }
 
     var canSearch = remember {
-        derivedStateOf { textSearch != "" }
+        derivedStateOf { query != "" }
     }
-    Column() {
-        Box(
-            modifier = Modifier
-                .height(300.dp)
-        ) {
-            Image(
-                painter = painterResource(R.drawable.img_poster),
-                "",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Text("Welcome", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
-
-                Text("Millions of movies, TV shows and people to discover", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
-
-
-                TextField(
-                    value = textSearch,
-                    onValueChange = {
-                        textSearch = it
-                    },
-                    placeholder = {
-                        Text(
-                            text = "Search movie you want...",
-                            fontSize = 14.sp,
-                            color = HintTextMovie,
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                    },
-                    trailingIcon = {
-                        Text(
-                            "Search",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White,
-                            modifier = Modifier
-                                .height(60.dp)
-                                .clip(RoundedCornerShape(30.dp))
-                                .clickable (
-                                    enabled = canSearch.value
-                                ) {
-                                    // navigate to search page
-
-                                }
-                                .background(if (canSearch.value) BlueMovie else BlueMovie.copy(alpha = 0.7f))
-                                .padding(horizontal = 20.dp)
-                                .wrapContentSize(Alignment.Center),
-                        )
-                    },
-                    modifier = Modifier
-                        .height(50.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(30.dp))
-                )
+    LaunchedEffect(true) {
+        snapshotFlow { query }
+            .distinctUntilChanged()
+            .debounce(300)
+            .collect {
+                if (it.isNotEmpty()) {
+                    homeViewModel.searchByKeyword(it)
+                }
             }
-        }
-        // Trending
-        Column (
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(PinkMovie)
-                .padding(horizontal = 10.dp, vertical = 30.dp)
-        ) {
-            Row (
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                verticalAlignment = Alignment.CenterVertically,
+    }
+    Box {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
                 modifier = Modifier
-                    .padding(bottom = 20.dp)
+                    .height(300.dp)
             ) {
-                Text("Trending", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Row (
+                Image(
+                    painter = painterResource(R.drawable.img_poster),
+                    "",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(PurpleMovie)
+                        .fillMaxSize()
+                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Text(
-                        "Today",
-                        fontSize = 10.sp,
-                        color = if (trendingMode == TrendingMode.day) Color.Black else Color.White,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (trendingMode == TrendingMode.day) YellowMovie else PurpleMovie)
-                            .clickable {
-                                if (trendingMode != TrendingMode.day) trendingMode = TrendingMode.day
-                            }
-                            .padding(5.dp)
+                        "Welcome",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold
                     )
 
                     Text(
-                        "This week",
-                        fontSize = 10.sp,
+                        "Millions of movies, TV shows and people to discover",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+
+
+                    TextField(
+                        value = query,
+                        onValueChange = {
+                            query = it
+                            // debounce result search
+
+                        },
+                        placeholder = {
+                            Text(
+                                text = "Search movie you want...",
+                                fontSize = 14.sp,
+                                color = HintTextMovie,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        },
+                        trailingIcon = {
+                            Text(
+                                "Search",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .height(60.dp)
+                                    .clip(RoundedCornerShape(30.dp))
+                                    .clickable(
+                                        enabled = canSearch.value
+                                    ) {
+
+                                    }
+                                    .background(
+                                        if (canSearch.value) BlueMovie else BlueMovie.copy(
+                                            alpha = 0.7f
+                                        )
+                                    )
+                                    .padding(horizontal = 20.dp)
+                                    .wrapContentSize(Alignment.Center),
+                            )
+                        },
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (trendingMode == TrendingMode.week) YellowMovie else PurpleMovie)
-                            .clickable {
-                                if (trendingMode != TrendingMode.week) trendingMode = TrendingMode.week
-                            }
-                            .padding(5.dp),
-                        color = if (trendingMode == TrendingMode.week) Color.Black else Color.White
+                            .height(50.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(30.dp))
                     )
                 }
             }
-            when (trendingMovieState) {
-                is TrendingUiState.Loading -> CircularProgressIndicator()
-                is TrendingUiState.Failer -> CircularProgressIndicator()
-                is TrendingUiState.Success ->
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(18.dp)
-                    ) {
-                        items((trendingMovieState as TrendingUiState.Success).movies) { item ->
-                            TrendingItem(item.id, item.posterPath, item.title, item.releaseDate) { id ->
-                                navigateToMovieDetail(id)
-                            }
-                        }
-                    }
-            }
-
-        }
-
-        // Lastest trailer
-
-
-        Box {
+            // Trending
             Column(
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(PinkMovie)
+                    .padding(horizontal = 10.dp, vertical = 30.dp)
             ) {
                 Row(
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(20.dp)
+                    modifier = Modifier
+                        .padding(bottom = 20.dp)
                 ) {
-                    Text("Latest trailer", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
-
+                    Text("Trending", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(GrayMovie)
+                            .background(PurpleMovie)
                     ) {
                         Text(
-                            "Popular",
+                            "Today",
                             fontSize = 10.sp,
-                            color = if (trendingMode == TrendingMode.week) Color.Black else Color.White,
+                            color = if (trendingMode == TrendingMode.day) Color.Black else Color.White,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(if (trendingMode == TrendingMode.week) GreenMovie else GrayMovie)
+                                .background(if (trendingMode == TrendingMode.day) YellowMovie else PurpleMovie)
+                                .clickable {
+                                    if (trendingMode != TrendingMode.day) trendingMode =
+                                        TrendingMode.day
+                                }
                                 .padding(5.dp)
                         )
+
                         Text(
-                            "In theater",
+                            "This week",
                             fontSize = 10.sp,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(if (trendingMode == TrendingMode.week) GreenMovie else GrayMovie)
+                                .background(if (trendingMode == TrendingMode.week) YellowMovie else PurpleMovie)
+                                .clickable {
+                                    if (trendingMode != TrendingMode.week) trendingMode =
+                                        TrendingMode.week
+                                }
                                 .padding(5.dp),
                             color = if (trendingMode == TrendingMode.week) Color.Black else Color.White
                         )
                     }
                 }
+                when (trendingMovieState) {
+                    is TrendingUiState.Loading -> CircularProgressIndicator()
+                    is TrendingUiState.Error -> CircularProgressIndicator()
+                    is TrendingUiState.Success ->
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(18.dp)
+                        ) {
+                            items((trendingMovieState as TrendingUiState.Success).movies) { item ->
+                                TrendingItem(
+                                    item.id,
+                                    item.posterPath,
+                                    item.title,
+                                    item.releaseDate
+                                ) { id ->
+                                    navigateToMovieDetail(id)
+                                }
+                            }
+                        }
+                }
 
-                Spacer(Modifier.height(15.dp))
+            }
+
+            // Lastest trailer
+
+
+            Box {
+                Column(
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        Text("Latest trailer", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
+
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(GrayMovie)
+                        ) {
+                            Text(
+                                "Popular",
+                                fontSize = 10.sp,
+                                color = if (trendingMode == TrendingMode.week) Color.Black else Color.White,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(if (trendingMode == TrendingMode.week) GreenMovie else GrayMovie)
+                                    .padding(5.dp)
+                            )
+                            Text(
+                                "In theater",
+                                fontSize = 10.sp,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(if (trendingMode == TrendingMode.week) GreenMovie else GrayMovie)
+                                    .padding(5.dp),
+                                color = if (trendingMode == TrendingMode.week) Color.Black else Color.White
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(15.dp))
+                }
             }
         }
+        SearchSection()
     }
 }
 
+@Preview
+@Composable
+fun SearchSection(modifier: Modifier = Modifier) {
+
+}
 @Composable
 private fun TrendingItem(
     id: Int,
@@ -250,9 +299,11 @@ private fun TrendingItem(
     onNavigate: (Int) -> Unit
 ) {
     Column(
-        modifier = Modifier.width(70.dp).clickable {
-            onNavigate(id)
-        }
+        modifier = Modifier
+            .width(70.dp)
+            .clickable {
+                onNavigate(id)
+            }
     ) {
 
         AsyncImage(

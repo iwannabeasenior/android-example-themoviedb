@@ -84,5 +84,13 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+    // data store - proto
+    implementation("androidx.datastore:datastore:1.1.4") // can implement
+    implementation("androidx.datastore:datastore-core:1.1.4") // core - can custom
+
+    // data store - preferences
+    implementation("androidx.datastore:datastore-preferences:1.1.4")
+    implementation("androidx.datastore:datastore-preferences-core:1.1.4")
 }
