@@ -1,4 +1,4 @@
-package com.example.movie.di.network
+package com.example.movie.di.coroutine
 
 import dagger.Module
 import dagger.Provides
@@ -6,7 +6,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Dispatchers.IO
 
 @Module
 @InstallIn(SingletonComponent::class)

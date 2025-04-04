@@ -1,5 +1,6 @@
 package com.example.movie.screen.movie
 
+import android.R
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -8,13 +9,21 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.example.movie.domain.base.Result
 import com.example.movie.domain.model.CastMember
+import com.example.movie.domain.model.MovieAccountState
 import com.example.movie.domain.model.MovieDetail
 import com.example.movie.domain.model.Video
+import com.example.movie.domain.repo.UserRepo
 import com.example.movie.domain.usecase.GetCastsMovieUC
 import com.example.movie.domain.usecase.GetMovieDetailByIdUC
 import com.example.movie.domain.usecase.GetVideosMovieUC
+import com.example.movie.domain.usecase.user.GetMovieAccountStateUC
 import com.example.movie.navigation.MovieDetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.properties.Delegates
@@ -24,6 +33,8 @@ class MovieDetailVM @Inject constructor(
     private val getMovieDetailByIdUC: GetMovieDetailByIdUC,
     private val getVideosMovieUC: GetVideosMovieUC,
     private val getCastsMovieUC: GetCastsMovieUC,
+    private val getMovieAccountStateUC: GetMovieAccountStateUC,
+    private val userRepo: UserRepo,
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
@@ -40,11 +51,44 @@ class MovieDetailVM @Inject constructor(
 
     val currentVideoKey = mutableStateOf<String?>(null)
 
+    private var movieAccountState = MutableStateFlow<MovieAccountState?>(null)
+
+    private val _favorite = movieAccountState
+        .map { it?.favorite }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            null
+        )
+    val favorite: StateFlow<Boolean?> = _favorite
+
+    private val _watchlist = movieAccountState
+        .map { it?.watchlist }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            null
+        )
+
+
+    val watchlist: StateFlow<Boolean?> = _watchlist
+
+    private val _rating  = movieAccountState
+        .map { it?.rated }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            null
+        )
+
+    val rating: StateFlow<Int?> = _rating
+
     init {
         movieId = savedStateHandle.toRoute<MovieDetailRoute>().id
         loadMovieDetail()
         loadVideos()
         loadCasts()
+        loadMovieAccountState()
     }
 
     fun showVideo(isShow: Boolean) {
@@ -66,6 +110,26 @@ class MovieDetailVM @Inject constructor(
             }
         }
     }
+    fun loadMovieAccountState() {
+        viewModelScope.launch {
+            val result = getMovieAccountStateUC.execute(movieId)
+            when(result) {
+                is Result.Success -> {
+                    movieAccountState.value = result.data
+                }
+                is Result.Error -> {
+                    // show error
+                }
+                else -> { }
+            }
+        }
+    }
+
+//    fun favoriteAction() {
+//        viewModelScope.launch {
+//            val result = userRepo.addToFavorite(accountId = , )
+//        }
+//    }
 
     fun loadVideos() {
         videoUiState.value = VideoUIState.Loading

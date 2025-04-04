@@ -1,0 +1,32 @@
+/*
+    (1)
+    * SharedPreferences:
+
+        Lưu trữ dưới dạng tệp XML trong bộ nhớ trong của thiết bị.
+
+        Hoạt động đồng bộ (synchronous), dẫn đến nguy cơ block UI thread.
+
+    * DataStore:
+
+        Sử dụng Kotlin coroutines và Flow để lưu trữ dữ liệu.
+
+        Lưu trữ dưới dạng Protocol Buffers (Proto) hoặc Preferences (tệp .preferences_pb).
+
+        Hoạt động bất đồng bộ (asynchronous), tránh block UI thread.
+    (2)
+    * Preferences DataStore:
+
+        Lưu trữ dữ liệu dưới dạng cặp key-value (tương tự như JSON).
+
+        Hỗ trợ các kiểu dữ liệu nguyên thủy như String, Int, Boolean, Float, Long.
+
+        Phù hợp với dữ liệu đơn giản.
+
+    * Proto DataStore:
+
+        Lưu trữ dữ liệu dưới dạng Protocol Buffers (định dạng nhị phân).
+
+        Có thể lưu trữ các đối tượng phức tạp và có cấu trúc, giống như một object.
+
+        Yêu cầu định nghĩa file .proto để mô tả cấu trúc dữ liệu.
+ */

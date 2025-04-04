@@ -44,24 +44,30 @@ fun BaseApp(appState: MovieAppState) {
         mutableStateOf(null)
     }
 
-    val isLogin: MutableState<Boolean?> = rememberSaveable {
-        mutableStateOf(null)
-    }
+    var isLogin = appState.isLogin
+        .filterNot { it == LoginState.Loading }
+        .collectAsStateWithLifecycle(initialValue = null)
 
     var startDestination: MutableState<KClass<*>> = remember {
         mutableStateOf(SplashRoute::class)
     }
-
-    LaunchedEffect(true) {
-
+    suspend fun setFirstTimeValue() {
         isFirstTime.value = (appState.isFirstTime
             .filterNot { it == FirstTimeState.Loading }
             .first() as FirstTimeState.Loaded)
             .value
-        isLogin.value = (appState.isLogin
-            .filterNot { it == LoginState.Loading }
-            .first() as LoginState.Loaded)
-            .value
+    }
+//    suspend fun setIsLoginValue() {
+//        isLogin.value = (appState.isLogin
+//            .filterNot { it == LoginState.Loading }
+//            .first() as LoginState.Loaded)
+//            .value
+//    }
+    LaunchedEffect(isLogin.value) {
+
+        setFirstTimeValue()
+
+//        setIsLoginValue()
 
         startDestination.value = if (isFirstTime.value == true) {
             SplashRoute::class
@@ -74,13 +80,12 @@ fun BaseApp(appState: MovieAppState) {
 //                }
 //            }
 //            LoginRoute::class
-            if (isLogin.value == true) {
+            if ((isLogin.value as? LoginState.Loaded)?.value == true) {
                 MainRoute::class
             } else {
                 LoginRoute::class
             }
         }
-        appState.userPreferences.saveIsNotFirstTime()
     }
 
     val isOffline = appState.isOffline.collectAsStateWithLifecycle()
@@ -107,4 +112,6 @@ fun BaseApp(appState: MovieAppState) {
         }
     }
 
+
 }
+

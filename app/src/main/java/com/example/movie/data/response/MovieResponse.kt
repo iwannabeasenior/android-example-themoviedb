@@ -19,9 +19,7 @@ data class MovieResponse(
     @SerializedName("release_date") val releaseDate: String?,
     @SerializedName("video") val video: Boolean?,
     @SerializedName("vote_average") val voteAverage: Double?,
-    @SerializedName("vote_count") val voteCount: Int?
+    @SerializedName("vote_count") val voteCount: Int?,
+    @SerializedName("rating") val rating: Int?
 )
 
-data class NetWorkResponse<T> (
-    @SerializedName("results") val results: T,
-)

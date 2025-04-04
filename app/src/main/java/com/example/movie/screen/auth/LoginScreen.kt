@@ -54,22 +54,20 @@ fun LoginScreen(vm: LoginVM = hiltViewModel(), appState: MovieAppState, onNaviga
 
     val requestSessionState by vm.uiSessionState.collectAsStateWithLifecycle()
 
-    val snackBarHostState = remember {
-        SnackbarHostState()
-    }
+    val value = LocalIsAuthen.current
 
-    val scope = rememberCoroutineScope()
+    val snackBarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState, requestSessionState) {
-        if (uiState is LoginUiState.Error || requestSessionState is RequestSessionState.Error) {
-            snackBarHostState.showSnackbar("Authentication failed, Please try again", duration = SnackbarDuration.Short)
-        }
-        if (requestSessionState is RequestSessionState.Success) {
-            appState.userPreferences.saveSessionId((requestSessionState as RequestSessionState.Success).sessionID)
-        }
+        handleUiStateChanges(
+            uiState = uiState,
+            requestSessionState = requestSessionState,
+            appState = appState,
+            snackBarHostState = snackBarHostState,
+            onNavigateToMainRoute = onNavigateToMainRoute
+        )
     }
 
-    val value = LocalIsAuthen.current
 
     LaunchedEffect(value) {
         if (value == true) {
@@ -85,55 +83,71 @@ fun LoginScreen(vm: LoginVM = hiltViewModel(), appState: MovieAppState, onNaviga
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                "You have not yet to log in, Log In ------>",
-                fontSize = 20.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontStyle = FontStyle.Italic,
-                modifier = Modifier.padding(bottom = 20.dp)
-            )
-            TextButton(
-                onClick = {
-                    vm.requestToken()
-                },
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(Color.White)
-            ) {
-                Text("Log In", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            LoginPrompt {
+                vm.requestToken()
             }
         }
-        when (uiState) {
-            is LoginUiState.Success -> {
-                val url = LinkUtil.createUserPermissionURL(requestToken = (uiState as LoginUiState.Success).token)
-                AuthenWebView(url)
-            }
-            is LoginUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            is LoginUiState.Error -> {}
-            else -> {}
-        }
-        when (requestSessionState) {
-            is RequestSessionState.Success -> {
-                onNavigateToMainRoute()
-            }
-            is RequestSessionState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            is RequestSessionState.Error -> {}
-            else -> {}
-        }
+
+        HandleUiState(modifier = Modifier.align(Alignment.Center), uiState = uiState)
+
+        HandleSessionState(modifier = Modifier.align(Alignment.Center), requestSessionState = requestSessionState, onNavigateToMainRoute = onNavigateToMainRoute)
 
     }
 }
-
 @Composable
-fun AuthenWebView(url: String) {
+private fun HandleUiState(modifier: Modifier = Modifier, uiState: LoginUiState?) {
+    when (uiState) {
+        is LoginUiState.Success -> {
+            val url = LinkUtil.createUserPermissionURL(requestToken = uiState.token)
+            AuthenWebView(url)
+        }
+        is LoginUiState.Loading -> CircularProgressIndicator(modifier = Modifier.then(modifier))
+        is LoginUiState.Error -> {}  // Can show an error message if needed
+        else -> {}
+    }
+}
+@Composable
+private fun HandleSessionState(
+    modifier: Modifier = Modifier,
+    requestSessionState: RequestSessionState?,
+    onNavigateToMainRoute: () -> Unit
+) {
+    when (requestSessionState) {
+        is RequestSessionState.Success -> onNavigateToMainRoute()
+        is RequestSessionState.Loading -> CircularProgressIndicator(modifier = Modifier.then(modifier))
+        is RequestSessionState.Error -> {}  // Can show an error message if needed
+        else -> {}
+    }
+}
+@Composable
+private fun LoginPrompt(onLoginClick: () -> Unit) {
+    Text(
+        "You have not yet to log in, Log In ------>",
+        fontSize = 20.sp,
+        color = Color.White,
+        fontWeight = FontWeight.Bold,
+        fontStyle = FontStyle.Italic,
+        modifier = Modifier.padding(bottom = 20.dp)
+    )
+    TextButton(
+        onClick = onLoginClick,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(Color.White)
+    ) {
+        Text("Log In", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+    }
+
+}
+@Composable
+private fun AuthenWebView(url: String) {
     val context = LocalContext.current
     context.openWebViewWithUrl(url)
 }
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewScreen(url: String) {
+private fun WebViewScreen(url: String) {
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { context ->
@@ -151,4 +165,22 @@ fun WebViewScreen(url: String) {
             webView.loadUrl(url)
         }
     )
+}
+
+
+private suspend fun handleUiStateChanges(
+    uiState: LoginUiState?,
+    requestSessionState: RequestSessionState?,
+    appState: MovieAppState,
+    snackBarHostState: SnackbarHostState,
+    onNavigateToMainRoute: () -> Unit
+) {
+    if (uiState is LoginUiState.Error || requestSessionState is RequestSessionState.Error) {
+        val message = "Authentication failed, Please try again"
+        snackBarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+    }
+    if (requestSessionState is RequestSessionState.Success) {
+        appState.userPreferences.saveSessionId(requestSessionState.sessionID)
+        onNavigateToMainRoute()
+    }
 }

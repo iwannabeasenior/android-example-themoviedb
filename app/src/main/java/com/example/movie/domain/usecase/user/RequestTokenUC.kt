@@ -1,4 +1,4 @@
-package com.example.movie.domain.usecase
+package com.example.movie.domain.usecase.user
 
 import com.example.movie.data.response.RequestTokenResponse
 import com.example.movie.domain.base.Result

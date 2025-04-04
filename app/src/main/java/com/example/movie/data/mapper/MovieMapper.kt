@@ -21,17 +21,21 @@ import com.example.movie.domain.model.ProductionCountryISO
 import com.example.movie.domain.model.SpokenLanguage
 import com.example.movie.domain.model.Video
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class MovieMapper @Inject constructor() {
 
+    fun <T> mapNetWorkResponse(response: NetWorkResponse<T>): T {
+        return response.results
+    }
+
+
     fun mapListMovie(movies: NetWorkResponse<List<MovieResponse>>): List<Movie> {
-        return movies.results.map {
-            mapMovieTrending(it)
+        return mapNetWorkResponse(movies).map {
+            mapMovie(it)
         }
     }
 
-    fun mapMovieTrending(
+    fun mapMovie(
         movie: MovieResponse
     ) : Movie {
         return Movie(
@@ -49,7 +53,8 @@ class MovieMapper @Inject constructor() {
             releaseDate = movie.releaseDate,
             video = movie.video,
             voteAverage = movie.voteAverage,
-            voteCount = movie.voteCount
+            voteCount = movie.voteCount,
+            rating = movie.rating
         )
     }
     fun mapMovieDetail(movie: MovieDetailResponse): MovieDetail {

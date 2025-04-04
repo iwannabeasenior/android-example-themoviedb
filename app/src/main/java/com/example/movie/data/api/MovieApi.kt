@@ -15,18 +15,18 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MovieApi {
-    @GET("trending/movie/{time}?language=en-US")
+    @GET("3/trending/movie/{time}?language=en-US")
     suspend fun getTrendingMovies(@Path("time") time: String) : Response<NetWorkResponse<List<MovieResponse>>>
-    @GET("movie/{movie_id}")
+    @GET("3/movie/{movie_id}")
     suspend fun getMovieDetail(@Path("movie_id") movieId: Int): Response<MovieDetailResponse>
-    @GET("movie/{movie_id}/videos")
+    @GET("3/movie/{movie_id}/videos")
     suspend fun getVideosMovie(@Path("movie_id") movieId: Int): Response<NetWorkResponse<List<VideoResponse>>>
-    @GET("movie/{movie_id}/credits")
+    @GET("3/movie/{movie_id}/credits")
     suspend fun getCastsMovie(@Path("movie_id") movieId: Int): Response<MovieCreditsResponse>
-    @GET("person/{person_id}")
+    @GET("3/person/{person_id}")
     suspend fun getPeopleDetail(@Path("person_id") personId: Int): Response<PersonDetailResponse>
-    @GET("person/{person_id}/movie_credits")
+    @GET("3/person/{person_id}/movie_credits")
     suspend fun getCreditMovies(@Path("person_id") personId: Int): Response<CreditMoviesResponse>
-    @GET("search/multi")
+    @GET("3/search/multi")
     suspend fun searchByKeyWord(@Query("query") keyword: String): Response<List<SearchResult>> // media_type to indicate specific type
 }

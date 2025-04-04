@@ -11,4 +11,8 @@ object LinkUtil {
         val url = "https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=mymovie://auth/callback"
         return url
     }
+    fun createUserPermissionURLV4(requestToken: String): String {
+        val url = "https://www.themoviedb.org/auth/access?request_token=${requestToken}"
+        return url
+    }
 }

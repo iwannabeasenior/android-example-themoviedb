@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -49,13 +50,13 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import com.example.movie.R
+import com.example.movie.ui.MovieAppState
 import com.example.movie.ui.theme.BlueMovie
 import com.example.movie.ui.theme.PurpleMovie
 
 
-@Preview
 @Composable
-fun SplashScreen(onNavigateToLogin: () -> Unit) {
+fun SplashScreen(appState: MovieAppState, onNavigateToLogin: () -> Unit) {
     val splashImage = listOf<Int>(
         R.drawable.gbu,
         R.drawable.forrest_gump,
@@ -76,6 +77,14 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
     }
 
     var maxIndex = splashImage.size - 1
+
+    suspend fun setNotFirstTimeAnymore() {
+        appState.userPreferences.saveIsNotFirstTime()
+    }
+
+    LaunchedEffect(true) {
+        setNotFirstTimeAnymore()
+    }
 
     Column(
         modifier = Modifier

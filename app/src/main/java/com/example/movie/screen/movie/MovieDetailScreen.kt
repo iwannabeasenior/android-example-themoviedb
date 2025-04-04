@@ -95,7 +95,7 @@ fun FailureComponent(modifier: Modifier = Modifier, onClick: () -> Unit) {
             .size(60.dp)
             .then(modifier)
     ) {
-        Icon(Icons.Default.Refresh, "", tint = Color.Black)
+        Icon(Icons.Default.Refresh, null, tint = Color.Black)
     }
 }
 @Composable

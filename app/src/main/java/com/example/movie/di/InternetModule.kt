@@ -3,6 +3,10 @@ package com.example.movie.di
 import com.example.movie.data.api.MovieApi
 import com.example.movie.data.api.UserApi
 import com.example.movie.data.response.SearchResult
+import com.example.movie.datastore.UserPreferences
+import com.example.movie.di.coroutine.ApplicationScope
+import com.example.movie.di.coroutine.Dispatcher
+import com.example.movie.di.coroutine.MovieDispatchers
 import com.example.movie.utils.Constant
 import com.example.movie.utils.SearchResultDeserializer
 import com.google.gson.Gson
@@ -12,13 +16,19 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.Response
+import okhttp3.internal.wait
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 import javax.inject.Named
 import javax.inject.Qualifier
 import javax.inject.Singleton
@@ -102,19 +112,29 @@ object InternetModule {
     }
 
 
-    @Named("GetOnlyResultInterceptor")
+    @Named("MainInterceptor")
     @Singleton
     @Provides
-    fun provideGetOnlyResultInterceptor() : Interceptor {
+    fun provideMainInterceptor(
+        userPreferences: UserPreferences,
+    ) : Interceptor {
         return object: Interceptor {
             override fun intercept(chain: Interceptor.Chain): Response {
-                val request = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer ${Constant.API_READ_ACCESS_TOKEN}")
-                    .addHeader("Accept", "application/json")
+                var accessToken: String? = null
+                accessToken = userPreferences.accessToken
+                val request = chain
+                    .request()
+                    .createBuilder(accessToken)
                     .build()
                 return chain.proceed(request)
             }
         }
+    }
+    fun Request.createBuilder(accessToken: String?): Request.Builder{
+        val passAccessToken = accessToken ?: Constant.API_READ_ACCESS_TOKEN
+        return this.newBuilder()
+            .addHeader("Authorization", "Bearer $passAccessToken")
+            .addHeader("Accept", "application/json")
     }
 
     @Named("LoggingInterceptor")
@@ -126,12 +146,30 @@ object InternetModule {
         }
     }
 
+    @Named("HandleExceptionInterceptor")
     @Singleton
     @Provides
-    fun provideOkHttp(@Named("GetOnlyResultInterceptor") interceptor: Interceptor, @Named("LoggingInterceptor") loggingInterceptor: Interceptor): OkHttpClient {
+    fun provideExceptionHandlingInterceptor() : Interceptor {
+        return object : Interceptor {
+            override fun intercept(chain: Interceptor.Chain): Response {
+                return try {
+                    val response = chain.proceed(chain.request())
+                    response
+                } catch (e: Exception) {
+                    println("Exception_is ${e.message}")
+                    throw e
+                }
+            }
+        }
+    }
+
+    @Singleton
+    @Provides
+    fun provideOkHttp(@Named("MainInterceptor") interceptor: Interceptor, @Named("LoggingInterceptor") loggingInterceptor: Interceptor, @Named("HandleExceptionInterceptor") handleExeptionInterceptor: Interceptor): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(interceptor)
-            .addInterceptor(loggingInterceptor)
+            .addNetworkInterceptor(loggingInterceptor)
+            .addNetworkInterceptor(handleExeptionInterceptor)
             .build()
     }
 

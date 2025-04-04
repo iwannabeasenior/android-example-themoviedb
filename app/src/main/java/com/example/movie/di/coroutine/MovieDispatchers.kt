@@ -1,4 +1,4 @@
-package com.example.movie.di.network
+package com.example.movie.di.coroutine
 
 
 import javax.inject.Qualifier

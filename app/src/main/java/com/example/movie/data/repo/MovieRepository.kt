@@ -22,5 +22,4 @@ class MovieRepository @Inject constructor(@NormalAPI private val api: MovieApi) 
     override suspend fun getListCast(movieId: Int): Response<MovieCreditsResponse> = api.getCastsMovie(movieId)
     override suspend fun getPersonDetail(personId: Int): Response<PersonDetailResponse> = api.getPeopleDetail(personId)
     override suspend fun getPersonMovies(personId: Int): Response<CreditMoviesResponse> = api.getCreditMovies(personId)
-//    override suspend fun searchKeyword(keyword: String): Response<List<SearchResult>> = api.searchByKeyWord(keyword)
 }

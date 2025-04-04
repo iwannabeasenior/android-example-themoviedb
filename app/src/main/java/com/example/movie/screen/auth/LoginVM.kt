@@ -1,13 +1,11 @@
 package com.example.movie.screen.auth
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movie.domain.base.Result
-import com.example.movie.domain.usecase.RequestSessionUC
-import com.example.movie.domain.usecase.RequestTokenUC
+import com.example.movie.domain.usecase.user.RequestSessionUC
+import com.example.movie.domain.usecase.user.RequestTokenUC
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

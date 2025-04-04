@@ -3,6 +3,7 @@ package com.example.movie.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHost
@@ -17,6 +18,7 @@ import androidx.navigation.navigation
 import com.example.movie.screen.SplashScreen
 import com.example.movie.screen.actor.PersonDetailScreen
 import com.example.movie.screen.auth.LoginScreen
+import com.example.movie.screen.auth.V4LoginScreen
 import com.example.movie.screen.home.HomeScreen
 import com.example.movie.screen.movie.MovieDetailScreen
 import com.example.movie.screen.profile.ProfileScreen
@@ -36,12 +38,12 @@ fun MovieNavHost(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
     ) {
-        composable<SplashRoute> { SplashScreen { navController.navigateToLogin() } }
+        composable<SplashRoute> { SplashScreen(appState) { navController.navigateToLogin() } }
 
         composable<LoginRoute> {
-            LoginScreen(appState = appState) {
+            V4LoginScreen(appState = appState) {
                 navController.navigateToMainRoute(
                     navOptions = navOptions {
                         popUpTo(navController.graph.findStartDestination().id) {
@@ -50,7 +52,9 @@ fun MovieNavHost(
                     }
                 )
             }
+
         }
+
         composable<MainRoute> {
             MovieApp(appState = appState) {
                 navController.navigateToLogin(navOptions = navOptions {
@@ -87,7 +91,7 @@ fun MainNavHost(
                     navController.navigateToPersonDetailById(personId)
                 }
             }
-            composable<PersonDetailRoute> { entry ->
+                composable<PersonDetailRoute> { entry ->
                 PersonDetailScreen { movieId ->
                     navController.navigateToMovieDetailById(movieId)
                 }
@@ -113,9 +117,7 @@ fun MainNavHost(
             startDestination = MeRoute
         ) {
             composable<MeRoute> {
-                ProfileScreen(appState = appState) {
-                    onNavigateToLogin()
-                }
+                ProfileScreen(appState = appState)
             }
         }
 

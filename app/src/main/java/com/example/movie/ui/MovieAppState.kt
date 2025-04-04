@@ -32,7 +32,8 @@ fun rememberMovieAppState(
     navController: NavHostController = rememberNavController(),
     netWorkMonitor: NetWorkMonitor,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    userPreferences: UserPreferences
+    userPreferences: UserPreferences,
+    changeAuthState: (Boolean) -> Unit
 ): MovieAppState {
     return remember (
         navController
@@ -41,7 +42,8 @@ fun rememberMovieAppState(
             navController = navController,
             netWorkMonitor = netWorkMonitor,
             coroutineScope = coroutineScope,
-            userPreferences = userPreferences
+            userPreferences = userPreferences,
+            changeAuthState = changeAuthState
         )
     }
 }
@@ -50,7 +52,8 @@ class MovieAppState (
     val navController: NavHostController,
     val netWorkMonitor: NetWorkMonitor,
     val coroutineScope: CoroutineScope,
-    val userPreferences: UserPreferences
+    val userPreferences: UserPreferences,
+    val changeAuthState: (Boolean) -> Unit
 ) {
     // difference with normal state flow is that it can stop collect data from flow when no one subscribe, state flow is stop state.
     val isOffline = netWorkMonitor.isOnline
@@ -59,8 +62,8 @@ class MovieAppState (
             scope = coroutineScope,
             started = SharingStarted.WhileSubscribed(5_000),
             /* delay 5s before stopping flow when last subscriber disappears
-               - 2 other type: SharingStarted.Eagerly && SharingStarted.Lazily
-             */
+             * 2 other type: SharingStarted.Eagerly && SharingStarted.Lazily
+                */
             initialValue = false
         )
 
@@ -72,8 +75,7 @@ class MovieAppState (
             started = SharingStarted.Eagerly,
             initialValue = FirstTimeState.Loading
         )
-
-    val isLogin = userPreferences.getSessionId()
+    val isLogin = userPreferences.getAccessToken()
         .map { LoginState.Loaded(!it.isNullOrEmpty()) }
         .stateIn(
             scope = coroutineScope,
