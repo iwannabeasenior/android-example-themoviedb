@@ -1,7 +1,6 @@
 package com.example.movie.navigation
 
 import com.example.movie.R
-import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
 enum class TopLevelDestination(
@@ -26,8 +25,8 @@ enum class TopLevelDestination(
     ),
     ME(
         icon = R.drawable.ic_me,
-        route = MeRoute::class,
-        baseRoute = MeBaseRoute::class
+        route = ProfileRoute::class,
+        baseRoute = ProfileBaseRoute::class
     )
 }
 

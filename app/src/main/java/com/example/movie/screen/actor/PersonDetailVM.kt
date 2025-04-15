@@ -4,9 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.example.movie.data.response.CreditMoviesResponse
-import com.example.movie.domain.model.PersonDetail
-import com.example.movie.domain.usecase.GetPersonDetailUC
+import com.example.domain.usecase.GetPersonDetailUC
+import com.example.domain.usecase.GetPersonMoviesUC
+import com.example.common.base.Result
+import com.example.model.model.PersonDetail
+import com.example.model.response.CreditMoviesResponse
 import com.example.movie.navigation.PersonDetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.properties.Delegates
-import com.example.movie.domain.base.Result
-import com.example.movie.domain.usecase.GetPersonMoviesUC
 
 @HiltViewModel
 class PersonDetailVM @Inject constructor(
@@ -52,8 +52,8 @@ class PersonDetailVM @Inject constructor(
             val result = getPersonMoviesUC.execute(personId)
             _uiKnownForState.value = when (result) {
                 is Result.Success -> KnownForUiState.Success(result.data)
-                is Result.Loading -> KnownForUiState.Loading
-                is Result.Error -> KnownForUiState.Error
+                is com.example.common.base.Result.Loading -> KnownForUiState.Loading
+                is com.example.common.base.Result.Error -> KnownForUiState.Error
             }
         }
     }

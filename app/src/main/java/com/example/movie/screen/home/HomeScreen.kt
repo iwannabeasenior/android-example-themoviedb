@@ -80,14 +80,15 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel(), navigateToMovieDe
         derivedStateOf { query != "" }
     }
     LaunchedEffect(true) {
-        snapshotFlow { query }
-            .distinctUntilChanged()
-            .debounce(300)
-            .collect {
-                if (it.isNotEmpty()) {
-                    homeViewModel.searchByKeyword(it)
-                }
-            }
+        // state -> flow -> collect -> search
+//        snapshotFlow { query }
+//            .distinctUntilChanged()
+//            .debounce(300)
+//            .collect {
+//                if (it.isNotEmpty()) {
+//                    homeViewModel.searchByKeyword(it)
+//                }
+//            }
     }
     Box {
         Column(modifier = Modifier.fillMaxSize()) {

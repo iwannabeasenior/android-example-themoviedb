@@ -1,11 +1,9 @@
 package com.example.movie.di
 
-import com.example.movie.data.repo.MovieRepository
-import com.example.movie.data.repo.SearchRepository
-import com.example.movie.data.repo.UserRepository
-import com.example.movie.domain.repo.MovieRepo
-import com.example.movie.domain.repo.SearchRepo
-import com.example.movie.domain.repo.UserRepo
+import com.example.data.repo.MovieRepository
+import com.example.data.repo.UserRepository
+import com.example.domain.repo.MovieRepo
+import com.example.domain.repo.UserRepo
 import com.example.movie.utils.ConnectivityManagerNetWorkMonitor
 import com.example.movie.utils.NetWorkMonitor
 import dagger.Binds
@@ -25,9 +23,9 @@ abstract class BindsModule {
     @Binds
     internal abstract fun provideMovieRepo(repo: MovieRepository): MovieRepo
 
-    @Singleton
-    @Binds
-    internal abstract fun provideSearchRepo(repo: SearchRepository): SearchRepo
+//    @Singleton
+//    @Binds
+//    internal abstract fun provideSearchRepo(repo: SearchRepository): SearchRepo
 
     @Singleton
     @Binds

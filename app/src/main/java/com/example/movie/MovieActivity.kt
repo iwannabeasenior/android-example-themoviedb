@@ -17,9 +17,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.compose.rememberNavController
+import com.example.movie.base.ErrorQueue
 import com.example.movie.datastore.UserPreferences
 import com.example.movie.extention.addTitleLog
 import com.example.movie.screen.BaseApp
+import com.example.movie.screen.profile.subscreen.favorite.MyFavoriteScreen
 import com.example.movie.ui.rememberMovieAppState
 import com.example.movie.ui.theme.MovieTheme
 import com.example.movie.utils.NetWorkMonitor
@@ -46,6 +48,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var userPreferences: UserPreferences
 
+    @Inject
+    lateinit var errorQueue: ErrorQueue
+
     private var _isAuthen = mutableStateOf(false)
 
     val isAuthen: Boolean get() = _isAuthen.value
@@ -64,7 +69,8 @@ class MainActivity : ComponentActivity() {
                 navController = rememberNavController(),
                 netWorkMonitor = netWorkMonitor,
                 coroutineScope = rememberCoroutineScope(),
-                userPreferences = userPreferences
+                userPreferences = userPreferences,
+                errorQueue = errorQueue
             ) {
                 _isAuthen.value = it
             }

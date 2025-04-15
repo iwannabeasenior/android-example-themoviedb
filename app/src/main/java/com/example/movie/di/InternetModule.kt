@@ -1,12 +1,11 @@
 package com.example.movie.di
 
-import com.example.movie.data.api.MovieApi
-import com.example.movie.data.api.UserApi
-import com.example.movie.data.response.SearchResult
+import com.example.data.api.MovieApi
+import com.example.data.api.UserApi
+import com.example.model.response.MovieAccountStateResponse
+import com.example.model.response.SearchResult
 import com.example.movie.datastore.UserPreferences
-import com.example.movie.di.coroutine.ApplicationScope
-import com.example.movie.di.coroutine.Dispatcher
-import com.example.movie.di.coroutine.MovieDispatchers
+import com.example.movie.utils.AccountStateDeserializer
 import com.example.movie.utils.Constant
 import com.example.movie.utils.SearchResultDeserializer
 import com.google.gson.Gson
@@ -16,16 +15,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.internal.wait
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -42,6 +35,10 @@ annotation class NormalGson
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class CustomSearchGson
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AccountStateGson
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -75,41 +72,51 @@ object InternetModule {
         .create()
 
     @Provides
+    @AccountStateGson
+    fun provideAccountStateGson(): Gson = GsonBuilder()
+        .registerTypeAdapter(MovieAccountStateResponse::class.java, AccountStateDeserializer())
+        .create()
+
+    @Provides
     @NormalRetrofit
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient, @AccountStateGson gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl(Constant.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
     }
 
-    @Provides
-    @SearchRetrofit
-    fun provideSearchRetrofit(@CustomSearchGson gson: Gson, okHttpClient: OkHttpClient): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(Constant.BASE_URL)
-            .addConverterFactory(ValueExtractorConverterFactory.create(gson))
-            .client(okHttpClient)
-            .build()
-    }
+//
+//    @Provides
+//    @SearchRetrofit
+//    fun provideSearchRetrofit(@CustomSearchGson gson: Gson, okHttpClient: OkHttpClient): Retrofit {
+//        return Retrofit.Builder()
+//            .baseUrl(Constant.BASE_URL)
+//            .addConverterFactory(ValueExtractorConverterFactory.create(gson))
+//            .client(okHttpClient)
+//            .build()
+//    }
+
+
+
 
     @Singleton
     @Provides
-    @NormalAPI
     fun provideNormalMovieApi(@NormalRetrofit retrofit: Retrofit) : MovieApi {
         return retrofit
             .create(MovieApi::class.java)
     }
 
-    @Singleton
-    @SearchAPI
-    @Provides
-    fun provideSearchMovieApi(@SearchRetrofit retrofit: Retrofit) : MovieApi {
-        return retrofit
-            .create(MovieApi::class.java)
-    }
+//    @Singleton
+//    @SearchAPI
+//    @Provides
+//    fun provideSearchMovieApi(@SearchRetrofit retrofit: Retrofit) : MovieApi {
+//        return retrofit
+//            .create(MovieApi::class.java)
+//    }
 
 
     @Named("MainInterceptor")
@@ -118,6 +125,14 @@ object InternetModule {
     fun provideMainInterceptor(
         userPreferences: UserPreferences,
     ) : Interceptor {
+
+        fun Request.createBuilder(accessToken: String?): Request.Builder{
+            val passAccessToken = accessToken ?: Constant.API_READ_ACCESS_TOKEN
+            return this.newBuilder()
+                .addHeader("Authorization", "Bearer $passAccessToken")
+                .addHeader("Accept", "application/json")
+        }
+
         return object: Interceptor {
             override fun intercept(chain: Interceptor.Chain): Response {
                 var accessToken: String? = null
@@ -129,12 +144,6 @@ object InternetModule {
                 return chain.proceed(request)
             }
         }
-    }
-    fun Request.createBuilder(accessToken: String?): Request.Builder{
-        val passAccessToken = accessToken ?: Constant.API_READ_ACCESS_TOKEN
-        return this.newBuilder()
-            .addHeader("Authorization", "Bearer $passAccessToken")
-            .addHeader("Accept", "application/json")
     }
 
     @Named("LoggingInterceptor")

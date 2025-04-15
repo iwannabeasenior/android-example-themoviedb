@@ -2,11 +2,11 @@ package com.example.movie.screen.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movie.domain.base.Result
-import com.example.movie.domain.model.UserDetail
-import com.example.movie.domain.repo.UserRepo
-import com.example.movie.domain.usecase.user.GetUserDetailUC
+import com.example.domain.repo.UserRepo
+import com.example.domain.usecase.user.GetUserDetailUC
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.example.common.base.Result
+import com.example.model.model.UserDetail
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch

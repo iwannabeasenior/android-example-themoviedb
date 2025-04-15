@@ -1,6 +1,7 @@
 package com.example.movie.screen.home.cache
 
-import com.example.movie.domain.model.Movie
+import com.example.model.model.Movie
+
 
 class HomeCache {
     private constructor()

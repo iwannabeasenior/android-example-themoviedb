@@ -35,9 +35,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.movie.R
 import androidx.compose.runtime.getValue
 import coil.compose.AsyncImage
-import com.example.movie.data.response.CastCreditResponse
-import com.example.movie.data.response.CreditMoviesResponse
-import com.example.movie.domain.model.PersonDetail
+import com.example.model.model.PersonDetail
+import com.example.model.response.CastCreditResponse
+import com.example.model.response.CreditMoviesResponse
 import com.example.movie.utils.Constant
 
 @Composable
@@ -70,7 +70,7 @@ private fun ActorDetailScreenSuccess(person: PersonDetail, knownForUiState: Know
         }
         person.biography?.let {
             item {
-                BioSection(person.biography)
+                BioSection(it)
             }
         }
         item {

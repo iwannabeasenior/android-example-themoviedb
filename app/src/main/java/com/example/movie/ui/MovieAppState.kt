@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.util.trace
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -12,6 +13,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.example.movie.base.ErrorQueue
+import com.example.common.UIComponent
 import com.example.movie.datastore.UserPreferences
 import com.example.movie.navigation.TopLevelDestination
 import com.example.movie.navigation.navigateToActor
@@ -20,10 +23,13 @@ import com.example.movie.navigation.navigateToMe
 import com.example.movie.navigation.navigateToMovie
 import com.example.movie.utils.NetWorkMonitor
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 
@@ -33,6 +39,7 @@ fun rememberMovieAppState(
     netWorkMonitor: NetWorkMonitor,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     userPreferences: UserPreferences,
+    errorQueue: ErrorQueue,
     changeAuthState: (Boolean) -> Unit
 ): MovieAppState {
     return remember (
@@ -43,6 +50,7 @@ fun rememberMovieAppState(
             netWorkMonitor = netWorkMonitor,
             coroutineScope = coroutineScope,
             userPreferences = userPreferences,
+            errorQueue = errorQueue,
             changeAuthState = changeAuthState
         )
     }
@@ -53,6 +61,7 @@ class MovieAppState (
     val netWorkMonitor: NetWorkMonitor,
     val coroutineScope: CoroutineScope,
     val userPreferences: UserPreferences,
+    val errorQueue: ErrorQueue,
     val changeAuthState: (Boolean) -> Unit
 ) {
     // difference with normal state flow is that it can stop collect data from flow when no one subscribe, state flow is stop state.
@@ -82,8 +91,6 @@ class MovieAppState (
             started = SharingStarted.Eagerly,
             initialValue = LoginState.Loading
         )
-
-
 
     private val previousDestination = mutableStateOf<NavDestination?>(null)
 

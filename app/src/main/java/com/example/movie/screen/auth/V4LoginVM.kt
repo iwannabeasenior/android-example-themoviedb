@@ -3,8 +3,8 @@ package com.example.movie.screen.auth
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movie.data.response.V4RequestAccessTokenResponse
-import com.example.movie.domain.repo.UserRepo
+import com.example.domain.repo.UserRepo
+import com.example.model.response.V4RequestAccessTokenResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -56,8 +56,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.DialogHost
 import coil.compose.AsyncImage
+import com.example.model.model.UserDetail
 import com.example.movie.R
-import com.example.movie.domain.model.UserDetail
 import com.example.movie.ui.MovieAppState
 import com.example.movie.ui.theme.GrayMovie
 import com.example.movie.ui.theme.GreenMovie
@@ -71,10 +71,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.log
 
-// always learning how it works
-
 @Composable
-fun ProfileScreen(vm: ProfileVM = hiltViewModel(), appState: MovieAppState) {
+fun ProfileScreen(vm: ProfileVM = hiltViewModel(), appState: MovieAppState, onNavigateFavoriteList: () -> Unit) {
 
     var openDialog by remember {
         mutableStateOf(false)
@@ -115,7 +113,7 @@ fun ProfileScreen(vm: ProfileVM = hiltViewModel(), appState: MovieAppState) {
         )
     }
 
-    ProfileScreen(userDetailUIState.value, onLogoutClick = { openDialog = true })
+    ProfileScreen(userDetailUIState.value, onLogoutClick = { openDialog = true }, onNavigateFavoriteList = onNavigateFavoriteList)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -150,6 +148,7 @@ fun LogoutDialog(
 internal fun ProfileScreen(
     userDetailUIState: UserDetailUIState,
     onLogoutClick: () -> Unit,
+    onNavigateFavoriteList: () -> Unit,
 ) {
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -173,7 +172,7 @@ internal fun ProfileScreen(
 
         ListItemSection(
             onNavigateToLists = {},
-            onNavigateFavorite = {},
+            onNavigateFavorite = onNavigateFavoriteList,
             onNavigateWatchList = {},
             onNavigateRating = {},
         )

@@ -6,4 +6,5 @@ plugins {
     id ("com.google.dagger.hilt.android") version "2.56" apply false
     id ("org.jetbrains.kotlin.plugin.serialization") version "2.1.10" apply false
     kotlin("kapt") version "2.1.10" apply false
+    alias(libs.plugins.android.library) apply false
 }

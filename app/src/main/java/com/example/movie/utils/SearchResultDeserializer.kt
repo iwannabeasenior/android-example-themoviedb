@@ -1,15 +1,13 @@
 package com.example.movie.utils
 
-import com.example.movie.data.response.MovieSearchResult
-import com.example.movie.data.response.PersonSearchResult
-import com.example.movie.data.response.SearchResult
-import com.example.movie.data.response.TVSearchResult
+import com.example.model.response.MovieSearchResult
+import com.example.model.response.PersonSearchResult
+import com.example.model.response.SearchResult
+import com.example.model.response.TVSearchResult
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
-import okhttp3.MediaType
-import timber.log.Timber
 import java.lang.reflect.Type
 
 class SearchResultDeserializer : JsonDeserializer<List<SearchResult>> {

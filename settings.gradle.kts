@@ -21,4 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "movie"
 include(":app")
- 
+include(":core:domain")
+include(":core:data")
+include(":build-logic")
+include(":core:common")
+include(":core:model")

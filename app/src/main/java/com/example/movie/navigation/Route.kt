@@ -35,15 +35,15 @@ fun NavController.navigateToActor(navOptions: NavOptions) = navigate(
 data object ActorBaseRoute
 
 @Serializable
-data object MeRoute
+data object ProfileRoute
 
 fun NavController.navigateToMe(navOptions: NavOptions) = navigate(
-    route = MeRoute,
+    route = ProfileRoute,
     navOptions = navOptions
 )
 
 @Serializable
-data object MeBaseRoute
+data object ProfileBaseRoute
 
 @Serializable
 data class MovieDetailRoute(val id: Int)
@@ -64,12 +64,28 @@ fun NavController.navigateToPersonDetailById(id: Int, navOptions: NavOptions? = 
 
 @Serializable
 data object SplashRoute
-fun NavController.navigateToSplash(navOptions: NavOptions? = null) = navigate(SplashRoute)
+fun NavController.navigateToSplash(navOptions: NavOptions? = null) = navigate(SplashRoute, navOptions)
 
 @Serializable
 data object LoginRoute
-fun NavController.navigateToLogin(navOptions: NavOptions? = null) = navigate(LoginRoute)
+fun NavController.navigateToLogin(navOptions: NavOptions? = null) = navigate(LoginRoute, navOptions)
 
 @Serializable
 data object MainRoute
-fun NavController.navigateToMainRoute(navOptions: NavOptions? = null) = navigate(MainRoute)
+fun NavController.navigateToMainRoute(navOptions: NavOptions? = null) = navigate(MainRoute, navOptions)
+
+@Serializable
+data object FavoriteListRoute
+fun NavController.navigateToFavoriteList(navOptions: NavOptions? = null) = navigate(FavoriteListRoute, navOptions)
+
+@Serializable
+data object ListsListRoute
+fun NavController.navigateToListsList(navOptions: NavOptions? = null) = navigate(ListsListRoute, navOptions)
+
+@Serializable
+data object WatchListRoute
+fun NavController.navigateToWatchList(navOptions: NavOptions? = null) = navigate(WatchListRoute, navOptions)
+
+@Serializable
+data object RatedListRoute
+fun NavController.navigateToRatedList(navOptions: NavOptions? = null) = navigate(RatedListRoute, navOptions)

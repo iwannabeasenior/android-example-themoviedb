@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.model.response.V4RequestAccessTokenResponse
 import com.example.movie.LocalIsAuthen
-import com.example.movie.data.response.V4RequestAccessTokenResponse
 import com.example.movie.datastore.UserPreferences
 import com.example.movie.extention.openWebViewWithUrl
 import com.example.movie.ui.MovieAppState

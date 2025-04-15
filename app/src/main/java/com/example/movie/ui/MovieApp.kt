@@ -18,6 +18,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
@@ -67,6 +68,9 @@ fun MovieApp(appState: MovieAppState, onNavigateToLogin: () -> Unit) {
             if (appState.isNotTopLevelDestination) {
                 TopAppBar(
                     title = {
+                        currentDestination?.route?.split(".")?.last()?.let {
+                            Text(it)
+                        }
                     },
                     navigationIcon = {
                         IconButton(
@@ -82,7 +86,7 @@ fun MovieApp(appState: MovieAppState, onNavigateToLogin: () -> Unit) {
             }
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()

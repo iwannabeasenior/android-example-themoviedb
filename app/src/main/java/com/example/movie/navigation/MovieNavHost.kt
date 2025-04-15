@@ -3,13 +3,8 @@ package com.example.movie.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,11 +12,15 @@ import androidx.navigation.navOptions
 import androidx.navigation.navigation
 import com.example.movie.screen.SplashScreen
 import com.example.movie.screen.actor.PersonDetailScreen
-import com.example.movie.screen.auth.LoginScreen
 import com.example.movie.screen.auth.V4LoginScreen
 import com.example.movie.screen.home.HomeScreen
-import com.example.movie.screen.movie.MovieDetailScreen
+import com.example.movie.screen.movie.detail.MovieDetailScreen
+import com.example.movie.screen.movie.list.MovieScreen
 import com.example.movie.screen.profile.ProfileScreen
+import com.example.movie.screen.profile.subscreen.favorite.MyFavoriteScreen
+import com.example.movie.screen.profile.subscreen.lists.MyListsScreen
+import com.example.movie.screen.profile.subscreen.rated.MyRatedScreen
+import com.example.movie.screen.profile.subscreen.watchlist.MyWatchListScreen
 import com.example.movie.ui.MovieApp
 import com.example.movie.ui.MovieAppState
 import kotlinx.coroutines.CoroutineScope
@@ -82,26 +81,22 @@ fun MainNavHost(
             startDestination = HomeRoute
         ) {
             composable<HomeRoute> {
-                HomeScreen { id ->
-                    navController.navigateToMovieDetailById(id)
-                }
+                HomeScreen(navigateToMovieDetail = navController::navigateToMovieDetailById)
             }
+
             composable<MovieDetailRoute> { entry ->
-                MovieDetailScreen { personId ->
-                    navController.navigateToPersonDetailById(personId)
-                }
+                MovieDetailScreen(navigateToPersonDetail = navController::navigateToPersonDetailById)
             }
-                composable<PersonDetailRoute> { entry ->
-                PersonDetailScreen { movieId ->
-                    navController.navigateToMovieDetailById(movieId)
-                }
+
+            composable<PersonDetailRoute> { entry ->
+                PersonDetailScreen(onNavigateToMovieDetail = navController::navigateToMovieDetailById)
             }
         }
         navigation<MovieBaseRoute>(
             startDestination = MovieRoute
         ) {
             composable<MovieRoute> {
-
+                MovieScreen(appState = appState)
             }
         }
 
@@ -113,12 +108,29 @@ fun MainNavHost(
             }
         }
 
-        navigation<MeBaseRoute>(
-            startDestination = MeRoute
+        navigation<ProfileBaseRoute>(
+            startDestination = ProfileRoute
         ) {
-            composable<MeRoute> {
-                ProfileScreen(appState = appState)
+            composable<ProfileRoute> {
+                ProfileScreen(appState = appState, onNavigateFavoriteList = navController::navigateToFavoriteList)
             }
+
+            composable<FavoriteListRoute> {
+                MyFavoriteScreen(onMovieClick = navController::navigateToMovieDetailById)
+            }
+
+            composable<ListsListRoute> {
+                MyListsScreen()
+            }
+
+            composable<WatchListRoute> {
+                MyWatchListScreen()
+            }
+
+            composable<RatedListRoute> {
+                MyRatedScreen()
+            }
+
         }
 
     }

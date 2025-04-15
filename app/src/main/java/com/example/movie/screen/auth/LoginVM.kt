@@ -1,11 +1,11 @@
 package com.example.movie.screen.auth
 
+import com.example.common.base.Result
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movie.domain.base.Result
-import com.example.movie.domain.usecase.user.RequestSessionUC
-import com.example.movie.domain.usecase.user.RequestTokenUC
+import com.example.domain.usecase.user.RequestSessionUC
+import com.example.domain.usecase.user.RequestTokenUC
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +35,7 @@ class LoginVM @Inject constructor(
             _uiState.value = when (result) {
                 is Result.Success -> {
                     token = result.data.requestToken!!
-                    LoginUiState.Success(result.data.requestToken)
+                    LoginUiState.Success(token)
                 }
 
                 is Result.Loading -> LoginUiState.Loading
@@ -57,10 +57,10 @@ class LoginVM @Inject constructor(
                         RequestSessionState.Error
                     }
                 }
-                is Result.Error -> {
+                is com.example.common.base.Result.Error -> {
                     RequestSessionState.Error
                 }
-                is Result.Loading -> {
+                is com.example.common.base.Result.Loading -> {
                     RequestSessionState.Loading
                 }
             }

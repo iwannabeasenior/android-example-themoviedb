@@ -4,11 +4,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movie.data.response.SearchResult
-import com.example.movie.domain.base.Result
-import com.example.movie.domain.model.Movie
-import com.example.movie.domain.usecase.GetTrendingMovieUC
-import com.example.movie.domain.usecase.SearchByKeywordUC
+import com.example.domain.usecase.GetTrendingMovieUC
+import com.example.common.base.Result
+import com.example.model.model.Movie
+import com.example.model.response.SearchResult
 import com.example.movie.screen.home.cache.HomeCache
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +18,6 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getMovieUC: GetTrendingMovieUC,
-    private val searchByKeywordUC: SearchByKeywordUC
 ): ViewModel() {
 
     val cache: HomeCache = HomeCache.getInstance()
@@ -46,16 +44,16 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-    fun searchByKeyword(keyword: String) {
-        viewModelScope.launch {
-            val result = searchByKeywordUC.execute(keyword)
-            queryResult.value = when (result) {
-                is Result.Loading -> emptyList()
-                is Result.Error -> emptyList()
-                is Result.Success -> result.data
-            }
-        }
-    }
+//    fun searchByKeyword(keyword: String) {
+//        viewModelScope.launch {
+//            val result = searchByKeywordUC.execute(keyword)
+//            queryResult.value = when (result) {
+//                is com.example.common.base.Result.Loading -> emptyList()
+//                is com.example.common.base.Result.Error -> emptyList()
+//                is Result.Success -> result.data
+//            }
+//        }
+//    }
 }
 
 sealed interface TrendingUiState {

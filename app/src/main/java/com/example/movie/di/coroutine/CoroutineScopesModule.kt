@@ -22,6 +22,6 @@ internal object CoroutineScopesModule {
     @ApplicationScope
     @Singleton
     fun providesCoroutineScope(
-        @Dispatcher(MovieDispatchers. Default) dispatcher: CoroutineDispatcher
+        @Dispatcher(MovieDispatchers.Default) dispatcher: CoroutineDispatcher
     ): CoroutineScope = CoroutineScope(SupervisorJob() + dispatcher)
 }
